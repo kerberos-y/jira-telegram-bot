@@ -3,3 +3,6 @@ startCommand = "node src/index.js"
 
 [build]
 builder = "nixpacks"
+
+[experimental]
+runtimeV2 = false
