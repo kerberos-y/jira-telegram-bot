@@ -1,21 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const bot = require('../bot/index');
-const { handleStart, handleReport, handleConnectJira, handleTextMessage } = require('../bot/commands');
+const { 
+  handleStart, 
+  handleReport, 
+  handleConnectJira, 
+  handleButtonPress 
+} = require('../bot/commands');
 
-// Регистрация команд
+// Реєстрація команд
 bot.onText(/\/start/, handleStart);
 bot.onText(/\/report/, handleReport);
 bot.onText(/\/connect_jira (.+)/, handleConnectJira);
 
-// Обработка обычных сообщений (кнопка "Звіт")
+// Обробка текстових повідомлень (кнопки)
 bot.on('message', (msg) => {
+  // Ігноруємо команди, які починаються з "/"
   if (msg.text && !msg.text.startsWith('/')) {
-    handleTextMessage(msg);
+    handleButtonPress(msg);
   }
 });
 
-// Endpoint для Telegram webhook
+// Webhook endpoint
 router.post(`/telegram/${process.env.BOT_TOKEN}`, (req, res) => {
   try {
     bot.processUpdate(req.body);

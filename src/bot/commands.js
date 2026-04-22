@@ -3,19 +3,30 @@ const pool = require('../db/index');
 const axios = require('axios');
 const { getGroupMemberIds } = require('../services/telegramGroup');
 
-// Клавиатура с кнопкой "Звіт"
-async function sendReportKeyboard(chatId) {
-  const keyboard = {
+// --- Клавіатура з кнопками ---
+function getMainKeyboard() {
+  return {
     reply_markup: {
-      keyboard: [[{ text: '📊 Звіт' }]],
+      keyboard: [
+        [{ text: '📊 Звіт' }, { text: '🔗 Підключити Jira' }],
+        [{ text: '❓ Допомога' }]
+      ],
       resize_keyboard: true,
-      one_time_keyboard: false,
-    },
+      one_time_keyboard: false
+    }
   };
-  await bot.sendMessage(chatId, 'Оберіть дію:', keyboard);
 }
 
-// /start
+// --- Відправка привітання з клавіатурою ---
+async function sendWelcomeMessage(chatId, firstName) {
+  await bot.sendMessage(
+    chatId,
+    `Привіт, ${firstName}! 👋 Ласкаво просимо!\n\nОберіть дію з меню нижче:`,
+    getMainKeyboard()
+  );
+}
+
+// --- Команда /start ---
 async function handleStart(msg) {
   const chatId = msg.chat.id;
   const telegramId = msg.from.id;
@@ -34,15 +45,14 @@ async function handleStart(msg) {
       [telegramId, username, firstName, lastName]
     );
     console.log(`[Bot] /start from ${telegramId} (${firstName})`);
-    await bot.sendMessage(chatId, `Привіт, ${firstName}! 👋 Ласкаво просимо!`);
-    await sendReportKeyboard(chatId);
+    await sendWelcomeMessage(chatId, firstName);
   } catch (error) {
     console.error('[Bot] handleStart error:', error);
-    await bot.sendMessage(chatId, 'Щось пішло не так. Спробуй ще раз.');
+    await bot.sendMessage(chatId, '❌ Щось пішло не так. Спробуй ще раз.');
   }
 }
 
-// /report
+// --- Команда /report ---
 async function handleReport(msg) {
   const chatId = msg.chat.id;
 
@@ -104,14 +114,14 @@ async function handleReport(msg) {
   }
 }
 
-// /connect_jira <email>
+// --- Команда /connect_jira (текстова) ---
 async function handleConnectJira(msg, match) {
   const chatId = msg.chat.id;
   const telegramId = msg.from.id;
   const jiraEmail = match[1]?.trim();
 
   if (!jiraEmail) {
-    await bot.sendMessage(chatId, 'Використання: /connect_jira your@email.com');
+    await bot.sendMessage(chatId, '📧 Використання: `/connect_jira your@email.com`', { parse_mode: 'Markdown' });
     return;
   }
 
@@ -146,17 +156,43 @@ async function handleConnectJira(msg, match) {
     );
   } catch (error) {
     console.error('[Bot] handleConnectJira error:', error?.response?.data || error.message);
-    await bot.sendMessage(chatId, 'Помилка при підключенні Jira акаунту.');
+    await bot.sendMessage(chatId, '❌ Помилка при підключенні Jira акаунту.');
   }
 }
 
-// Обробка текстової кнопки "📊 Звіт"
-async function handleTextMessage(msg) {
+// --- Обробка натискань на кнопки ---
+async function handleButtonPress(msg) {
   const chatId = msg.chat.id;
   const text = msg.text;
+
   if (text === '📊 Звіт') {
     await handleReport(msg);
+  } 
+  else if (text === '🔗 Підключити Jira') {
+    await bot.sendMessage(
+      chatId,
+      '🔗 *Як підключити Jira:*\nНадішліть команду:\n`/connect_jira your@email.com`\n(замініть your@email.com на вашу пошту в Jira)',
+      { parse_mode: 'Markdown' }
+    );
+  }
+  else if (text === '❓ Допомога') {
+    await bot.sendMessage(
+      chatId,
+      `📖 *Доступні команди:*\n\n` +
+      `/start – Зареєструватися та показати меню\n` +
+      `/report – Показати звіт по задачах\n` +
+      `/connect_jira email – Прив'язати обліковий запис Jira\n\n` +
+      `Або просто натискайте кнопки нижче.`,
+      { parse_mode: 'Markdown' }
+    );
   }
 }
 
-module.exports = { handleStart, handleReport, handleConnectJira, handleTextMessage, sendReportKeyboard };
+module.exports = { 
+  handleStart, 
+  handleReport, 
+  handleConnectJira, 
+  handleButtonPress,
+  sendWelcomeMessage,
+  getMainKeyboard 
+};
