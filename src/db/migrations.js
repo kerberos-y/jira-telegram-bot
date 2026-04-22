@@ -13,8 +13,7 @@ async function runMigrations() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
-
-  console.log('Migrations done');
+  console.log('[DB] Migrations done');
 }
 
 module.exports = runMigrations;

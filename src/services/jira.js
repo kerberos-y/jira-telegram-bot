@@ -6,12 +6,9 @@ const jiraClient = axios.create({
     username: process.env.JIRA_EMAIL,
     password: process.env.JIRA_API_TOKEN,
   },
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// Получить задачи пользователя в статусе "In Progress"
 async function getJiraUserTasks(accountId) {
   try {
     const jql = `assignee = "${accountId}" AND status = "In Progress" AND project = "${process.env.JIRA_PROJECT_KEY}"`;
