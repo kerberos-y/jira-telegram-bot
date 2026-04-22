@@ -1,5 +1,5 @@
 [deploy]
-startCommand = "node src/index.js"
+startCommand = "node src/server.js"
 
 [build]
 builder = "nixpacks"
