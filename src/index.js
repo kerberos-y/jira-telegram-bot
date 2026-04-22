@@ -1,3 +1,28 @@
+// --- ENV DEBUG (temporary) ---
+const ENV_VARS_TO_CHECK = [
+  'BOT_TOKEN',
+  'DATABASE_URL',
+  'JIRA_EMAIL',
+  'JIRA_API_TOKEN',
+  'JIRA_PROJECT_KEY',
+  'JIRA_BASE_URL',
+  'TELEGRAM_GROUP_CHAT_ID',
+  'PORT',
+];
+
+console.log('[ENV DEBUG] All environment variable keys:', Object.keys(process.env));
+
+console.log('[ENV DEBUG] Specific variable values:');
+for (const key of ENV_VARS_TO_CHECK) {
+  const value = process.env[key];
+  if (value === undefined) {
+    console.log(`  ${key}: *** NOT SET ***`);
+  } else {
+    console.log(`  ${key}: ${value}`);
+  }
+}
+// --- END ENV DEBUG ---
+
 const express = require('express');
 const runMigrations = require('./db/migrations');
 const webhookRouter = require('./routes/webhook');
