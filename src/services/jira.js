@@ -30,7 +30,7 @@ async function findJiraUser(email) {
  */
 async function getUserInProgressTasks(accountId) {
   // accountId НЕ береться в лапки в JQL
-  const jql = `assignee = ${accountId} AND status = "В работе" AND project = "${process.env.JIRA_PROJECT_KEY}"`;
+  const jql = `assignee = ${accountId} AND status = "In Progress" AND project = "${process.env.JIRA_PROJECT_KEY}"`;
   const res = await jiraClient.get('/rest/api/3/search/jql', {
     params: { jql, fields: 'summary,status,assignee', maxResults: 50 },
   });
