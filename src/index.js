@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const runMigrations = require('./db/migrations');
 const webhookRouter = require('./routes/webhook');
@@ -8,11 +7,9 @@ const bot = require('./bot/index');
 const app = express();
 app.use(express.json());
 
-// Роуты
-app.use('/webhook', webhookRouter);   // POST /webhook/jira
-app.use('/', telegramRouter);         // POST /telegram/<token>
+app.use('/webhook', webhookRouter);
+app.use('/', telegramRouter);
 
-// Healthcheck для Railway
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -22,12 +19,10 @@ const PORT = process.env.PORT || 3000;
 async function start() {
   try {
     await runMigrations();
-
     app.listen(PORT, () => {
       console.log(`[Server] Running on port ${PORT}`);
     });
 
-    // Установка webhook для Telegram
     const domain = process.env.RAILWAY_PUBLIC_DOMAIN || process.env.APP_DOMAIN;
     if (domain) {
       const webhookUrl = `https://${domain}/telegram/${process.env.BOT_TOKEN}`;
