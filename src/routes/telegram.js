@@ -1,27 +1,29 @@
 const express = require('express');
-const router = express.Router();
-const bot = require('../bot/index');
-const { 
-  handleStart, 
-  handleReport, 
-  handleConnectJira, 
-  handleButtonPress 
+const router  = express.Router();
+const bot     = require('../bot/index');
+const {
+  handleStart,
+  handleReport,
+  handleConnectJira,
+  handleButtonPress,
 } = require('../bot/commands');
 
-// Реєстрація команд
-bot.onText(/\/start/, handleStart);
-bot.onText(/\/report/, handleReport);
-bot.onText(/\/connect_jira (.+)/, handleConnectJira);
+// ─── Реєстрація команд ────────────────────────────────────────────────────────
+// Підтримуємо і "/cmd" і "/cmd@BotName" (для групових чатів)
 
-// Обробка текстових повідомлень (кнопки)
+bot.onText(/\/start(@\w+)?$/, handleStart);
+bot.onText(/\/report(@\w+)?$/, handleReport);
+bot.onText(/\/connect_jira(?:@\w+)?\s+(.+)/, handleConnectJira);
+
+// Текстові повідомлення (кнопки клавіатури)
 bot.on('message', (msg) => {
-  // Ігноруємо команди, які починаються з "/"
   if (msg.text && !msg.text.startsWith('/')) {
     handleButtonPress(msg);
   }
 });
 
-// Webhook endpoint
+// ─── Webhook endpoint ─────────────────────────────────────────────────────────
+
 router.post(`/telegram/${process.env.BOT_TOKEN}`, (req, res) => {
   try {
     bot.processUpdate(req.body);

@@ -6,11 +6,11 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }, // Railway требует SSL
+  ssl: { rejectUnauthorized: false },
 });
 
 pool.on('error', (err) => {
-  console.error('PostgreSQL pool error:', err);
+  console.error('[DB] Pool error:', err);
 });
 
 module.exports = pool;
